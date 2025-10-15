@@ -1,36 +1,21 @@
 // src/index.js
-import fs from 'fs';
-import path from 'path';
+
 import _ from 'lodash';
+import parseData from './parsers.js';
 
-const readFile = (filepath) => {
-  const fullPath = path.resolve(process.cwd(), filepath);
-  const data = fs.readFileSync(fullPath, 'utf-8');
-  return JSON.parse(data);
-};
-
-export default function genDiff(filepath1, filepath2) {
-  const data1 = readFile(filepath1);
-  const data2 = readFile(filepath2);
+const genDiff = (filepath1, filepath2) => {
+  const data1 = parseData(filepath1);
+  const data2 = parseData(filepath2);
 
   const keys = _.sortBy(_.union(Object.keys(data1), Object.keys(data2)));
+  const result = keys.map((key) => {
+    if (!_.has(data2, key)) return `  - ${key}: ${data1[key]}`;
+    if (!_.has(data1, key)) return `  + ${key}: ${data2[key]}`;
+    if (_.isEqual(data1[key], data2[key])) return `    ${key}: ${data1[key]}`;
+    return [`  - ${key}: ${data1[key]}`, `  + ${key}: ${data2[key]}`].join('\n');
+  }).join('\n');
 
-  const lines = keys.map((key) => {
-    if (!Object.hasOwn(data2, key)) {
-      return `  - ${key}: ${data1[key]}`;
-    }
-    if (!Object.hasOwn(data1, key)) {
-      return `  + ${key}: ${data2[key]}`;
-    }
-    if (data1[key] !== data2[key]) {
-      return [
-        `  - ${key}: ${data1[key]}`,
-        `  + ${key}: ${data2[key]}`,
-      ].join('\n');
-    }
-    return `    ${key}: ${data1[key]}`;
-  });
+  return `{\n${result}\n}`.trim();
+};
 
-  return `{\n${lines.join('\n')}\n}`;
-}
-
+export default genDiff;
