@@ -1,21 +1,27 @@
 // src/index.js
-
-import _ from 'lodash';
 import parseData from './parsers.js';
+import buildDiff from './buildDiff.js';
+import formatStylish from './formatters/stylish.js';
 
-const genDiff = (filepath1, filepath2) => {
+// Función principal: compara dos archivos y muestra el resultado
+const genDiff = (filepath1, filepath2, format = 'stylish') => {
+  // 1️⃣ Leer y convertir los archivos (JSON o YAML) en objetos JS
   const data1 = parseData(filepath1);
   const data2 = parseData(filepath2);
 
-  const keys = _.sortBy(_.union(Object.keys(data1), Object.keys(data2)));
-  const result = keys.map((key) => {
-    if (!_.has(data2, key)) return `  - ${key}: ${data1[key]}`;
-    if (!_.has(data1, key)) return `  + ${key}: ${data2[key]}`;
-    if (_.isEqual(data1[key], data2[key])) return `    ${key}: ${data1[key]}`;
-    return [`  - ${key}: ${data1[key]}`, `  + ${key}: ${data2[key]}`].join('\n');
-  }).join('\n');
+  // 2️⃣ Crear el árbol de diferencias
+  const diffTree = buildDiff(data1, data2);
 
-  return `{\n${result}\n}`.trim();
+  // 3️⃣ Formatear el resultado según el formato elegido
+  // (por ahora solo tenemos 'stylish')
+  if (format === 'stylish') {
+    return formatStylish(diffTree);
+  }
+
+  // Si alguien pone otro formato que aún no existe, mostramos stylish
+  return formatStylish(diffTree);
 };
 
 export default genDiff;
+
+

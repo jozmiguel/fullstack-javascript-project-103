@@ -1,7 +1,7 @@
 {
   "name": "@hexlet/code",
   "version": "1.0.0",
-  "description": "C",
+  "description": "CLI que compara dos archivos de configuración y muestra las diferencias",
   "homepage": "https://github.com/jozmiguel/fullstack-javascript-project-103#readme",
   "bugs": {
     "url": "https://github.com/jozmiguel/fullstack-javascript-project-103/issues"
